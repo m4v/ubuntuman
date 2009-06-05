@@ -24,13 +24,14 @@ UMConf = conf.supybot.plugins.UbuntuMan
 class UbuntuManTestCase(PluginTestCase):
     plugins = ('UbuntuMan',)
 
-    def _testMan(self):
-        self.assertRegexp('man grep', '^grep.*\|')
-        self.assertRegexp('man ls', '^ls.*\|')
-        self.assertRegexp('man asdasd', '^No manual page for')
+    def testMan(self):
+        self.assertNotError('man grep')
+        #self.assertRegexp('man grep', '^grep.*\|')
+        #self.assertRegexp('man ls', '^ls.*\|')
+        #self.assertRegexp('man asdasd', '^No manual page for')
         # test length limit
-        m = self.getMsg('man grep')
-        self.assertTrue(len(m.args[1]) <= 300)
+        #m = self.getMsg('man grep')
+        #self.assertTrue(len(m.args[1]) <= 300)
 
     def _testManurl(self):
         (base, rel, lang) = (UMConf.baseurl, UMConf.release, UMConf.language)

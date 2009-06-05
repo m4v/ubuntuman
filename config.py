@@ -62,6 +62,8 @@ conf.registerGlobalValue(UbuntuMan, 'sections',
     registry.SpaceSeparatedListOfStrings(['1', '5', '8'],
              """Determines the list of enabled manual page sections."""))
 
+# TODO use registerChannelValue instead of registerGlobalValue
+# for per channel config
 conf.registerGlobalValue(UbuntuMan, 'language',
     registry.String('en',
              """Determines the default language. Currently supported: de, en,
@@ -77,9 +79,5 @@ conf.registerGlobalValue(UbuntuMan, 'maxLength',
         registry.Integer(300, """Determines maximun length of the output, if
         supybot.reply.mores.length has a value other than zero this register
         has no effect."""))
-
-conf.registerGlobalValue(UbuntuMan, 'cachedir',
-        registry.String('', """Determines the location of the local manual page
-        cache."""))
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=79:

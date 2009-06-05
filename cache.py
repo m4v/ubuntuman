@@ -21,41 +21,43 @@ class ManpageCache:
     Class implementing the manual page cache.
     """
 
-    def __init__(self, conf):
-        self.baseurl = conf.baseurl
-        self.cachedir = conf.cachedir
-        self.parsers = {'en': en.ManpageParser}
+    def __init__(self, baseurl, cachedir):
+        self.baseurl = baseurl
+        self.cachedir = cachedir
+        #self.parsers = {'en': en.ManpageParser} # XXX 'en' isn't defined yet
 
-    def download(self, release, language, section, command):
+    def download(self, release, language, command):
         """
         Download, parse and cache locally the manual page from the configured
         online manual page repository. Returns the manual page as a dictionary.
         """
-        url = "%s/%s/%s/man%s/%s.%s.gz" %
-            (self.baseurl(), release, language, section, command, section)
+
         # TO BE IMPLEMENTED
+        assert(type(self.baseurl()) is str)
+        section = 1
+
+        url = "%s/%s/%s/man%s/%s.%s.gz" % \
+            (self.baseurl(), release, language, section, command, section)
         return None
 
-    def fetch(self, release, language, section, command):
+    def fetch(self, release, language, command):
         """
         Fetches the requested manual page from the cache or downloads it from
         the online repository.
         """
 
-        assert(type(self.baseurl()) is str)
-        assert(type(self.cachedir()) is str)
+        assert(type(self.cachedir) is str)
         assert(type(release) is str)
         assert(type(language) is str)
-        assert(type(section) is str)
         assert(type(command) is str)
 
         try:
             # Open the cached manual page.
-            path = "%s/%s/%s/man%s/%s.repr" %
-                (self.cachedir(), release, language, section, command)
+            path = "%s/%s/%s/%s.repr" % \
+                (self.cachedir, release, language, command)
             return eval(open(path, "r").read())
         except:
             # Not found or eval error; download from the online repo.
-            return download(release, language, section, command)
+            return self.download(release, language, command)
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=79:

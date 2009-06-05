@@ -24,6 +24,7 @@ import supybot.registry as registry
 import supybot.callbacks as callbacks
 
 import sys
+from cache import ManpageCache
 
 class UbuntuMan(callbacks.Plugin):
     """This plugin provides commands for displaying UNIX manual pages from
@@ -32,13 +33,39 @@ class UbuntuMan(callbacks.Plugin):
     def __init__(self, irc):
         self.__parent = super(UbuntuMan, self)
         self.__parent.__init__(irc)
+        cachedir = conf.supybot.directories.data.dirize(self.name())
+        baseurl = lambda: self.registryValue('baseurl')
+        self.cache = ManpageCache(baseurl, cachedir)
+        #self.log.debug('UbuntuMan.__init__ cachedir:%r' % cachedir)
 
     def man(self, irc, msg, args, command, optlist):
         """<command> [--rel <release>] [--lang <language>] [--nocache]
-
         Displays a manual page from the Ubuntu Manpage Repository."""
-        # TO BE IMPLEMENTED
-        pass
+
+        release = language = None
+        nocache = False
+        for (k, v) in optlist:
+            if k == 'rel':
+                release = v
+            elif k == 'lang':
+                language = v
+            elif k == 'nocache':
+                nocache = True
+        if not release:
+            release = self.registryValue('release')
+        if not language:
+            language = self.registryValue('language')
+        self.log.debug('UbuntuMan.man - command:%r release:%r language:%r '\
+                'nocache:%r' % (command, release, language, nocache))
+        if nocache:
+            manpage = self.cache.download(release, language, command)
+        else:
+            manpage = self.cache.fetch(release, language, command)
+        self.log.debug('UbuntuMan.man - manpage:%r' % manpage)
+        if manpage:
+            irc.reply(manpage)
+        else:
+            irc.reply('No manual page for \'%s\'.' % command)
 
     def manurl(self, irc, msg, args, command, optlist):
         """<command> [--rel <release>] [--lang <language>]
@@ -58,7 +85,11 @@ class UbuntuMan(callbacks.Plugin):
         # TO BE IMPLEMENTED
         pass
 
-    man = wrap(man, ['something', getopts({'rel':'something', 'lang':'something', 'nocache':'something'}))
+    man = wrap(man, ['something', getopts({
+        'rel':'something',
+        'lang':'something',
+        'nocache':''}
+        )])
     manurl = wrap(manurl, ['something', getopts({'rel':'something', 'lang':'something'})])
     mancache = wrap(mancache, ['something'])
 
