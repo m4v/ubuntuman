@@ -24,7 +24,7 @@ UMConf = conf.supybot.plugins.UbuntuMan
 class UbuntuManTestCase(PluginTestCase):
     plugins = ('UbuntuMan',)
 
-    def testMan(self):
+    def _testMan(self):
         self.assertRegexp('man grep', '^grep.*\|')
         self.assertRegexp('man ls', '^ls.*\|')
         self.assertRegexp('man asdasd', '^No manual page for')
@@ -32,7 +32,7 @@ class UbuntuManTestCase(PluginTestCase):
         m = self.getMsg('man grep')
         self.assertTrue(len(m.args[1]) <= 300)
 
-    def testManurl(self):
+    def _testManurl(self):
         (base, rel, lang) = (UMConf.baseurl, UMConf.release, UMConf.language)
         url = '%s/%s/%s/man1/cat.1.html' % (base, rel, lang)
         self.assertResponse('manurl cat', url)
@@ -40,7 +40,7 @@ class UbuntuManTestCase(PluginTestCase):
         self.assertResponse('manurl cp --rel dapper --lang es', url)
         self.assertRegexp('manurl asdasd', '^No manual page for')
 
-    def testLanguages(self):
+    def _testLanguages(self):
         for s in ('en', 'es', 'de', 'it', 'fr'):
             self.assertNotRegexp('man ls --lang %s' % s, '^Failed to parse')
             self.assertNotRegexp('man bash --lang %s' % s, '^Failed to parse')
@@ -48,7 +48,7 @@ class UbuntuManTestCase(PluginTestCase):
         # this fails for now
         #self.assertNotRegexp('man aptitude --lang fi', '^Failed to parse')
 
-    def testFormat(self):
+    def _testFormat(self):
         cmd = 'grep'
         confbak = conf.supybot.plugins.UbuntuMan.format()
         try:
