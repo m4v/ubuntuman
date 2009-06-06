@@ -16,8 +16,8 @@
 
 import os
 import supybot.log as log
-from urllib2 import urlopen, Request
-from urllib import quote, basejoin
+import supybot.utils as utils
+from urllib import basejoin
 
 class ManpageCache:
     """
@@ -25,8 +25,8 @@ class ManpageCache:
     """
 
     def __init__(self, baseurl, cachedir):
-        self.header = { 'User-agent':'Mozilla/5.0 (compatible; UbuntuMan '\
-                'Supybot plugin/2.0.0a' }
+        self.header = { 'User-agent':
+                'Mozilla/5.0 (compatible; UbuntuMan Supybot plugin/2.0.0a' }
         self.baseurl = baseurl
         self.cachedir = cachedir
         #self.parsers = {'en': en.ManpageParser} # XXX 'en' isn't defined yet
@@ -35,16 +35,14 @@ class ManpageCache:
         """Build URL to a manual page."""
         url = 'manpages.gz/%s/%s/man%s/%s.%s.gz' % (release, language, section,
                 command, section)
-        url = basejoin(self.baseurl(), quote(url))
-        # XXX check if is a valid url? probably better not to.
+        url = basejoin(self.baseurl(), utils.web.urlquote(url))
         return url
 
     def __tryUrl(self, url):
         """Try to open the given URL.  If succeeds, returns it's file
         descriptor; otherwise returns None."""
         try:
-            request = Request(url, headers=self.header)
-            return urlopen(request)
+            return utils.web.getUrlFd(url, headers=self.header)
         except Exception, e:
             #raise Exception, e # XXX we should handle timeouts and invalid
                                 # urls errors
