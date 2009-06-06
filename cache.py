@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import supybot.log as log
 from urllib2 import urlopen, Request
 from urllib import quote
 
@@ -56,10 +57,10 @@ class ManpageCache:
         for section in ('1', '5', '8'): # XXX sections hardcoded for now
             for language in languages:
                 url = self.__buildUrl(release, section, command, language)
-                #self.log.debug('UbuntuMan: Trying url %s' % url)
+                log.debug('ManpageCache.__getManPageFd: Trying url %s' % url)
                 fd = self.__tryUrl(url)
                 if fd:
-                    #self.log.debug('UbuntuMan: Success')
+                    log.debug('ManpageCache.__getManPageFd: Success.')
                     return fd
         return None
 
