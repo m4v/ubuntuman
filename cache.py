@@ -67,18 +67,21 @@ class ManpageCache:
         from gzip import GzipFile
         return GzipFile(path)
 
-    def __makepath(self, release, language):
+    def __makepath(self, release, language, file=''):
         """Returns path in cache for a given release and language."""
-        return os.path.join(self.cachedir, release, language)
+        return os.path.join(self.cachedir, release, language, file)
 
-    def save(self, filename, data, release, language):
-        """Saves data as filename in the cache. Returns the fullpath of the new
-        file."""
-        path = self.__makepath(release, language)
+    def save(self, data, filename='', release='', language='', filepath=''):
+        """Saves data in the cache, returns the path of the new file.
+        The path is constructed with the filename, release, and language
+        variables, or you can provide the complete path in filepath."""
+        if not filepath:
+            assert filename, 'Error: no filename or filepath suplied'
+            filepath = self.__makepath(release, language, filename)
+        path = os.path.dirname(filepath)
         if not os.path.exists(path):
             os.makedirs(path)
-        filepath = os.path.join(path, filename)
-        log.info('ManpageCache.save: saving %r in cache.' % filepath)
+        log.info('ManpageCache.save: saving as %r.' % filepath)
         try:
             fd = open(filepath, 'w')
             fd.write(data)
@@ -87,23 +90,30 @@ class ManpageCache:
             raise IOError, e
         return filepath
 
-    def download(self, release, language, command):
+    def download(self, release, language, command, nocache=False):
         """
         Download, parse and cache locally the manual page from the configured
         online manual page repository. Returns the manual page as a dictionary.
         """
-
-        fd = self.__getManPageFd(release, language, command)
+        # check if the .gz is cached, we don't download in that case.
+        gzpath = self.__makepath(release, language, '%s.gz' % command)
+        try:
+            if nocache: raise Exception, 'nocache=True'
+            fd = open(gzpath)
+        except Exception, e:
+            log.debug('ManpageCache.download: not using %s.gz from cache: %s'\
+                    % (command, e))
+            fd = self.__getManPageFd(release, language, command)
         if fd:
             # save gzip
-            filepath = self.save('%s.gz' % command, fd.read(), release, language)
+            filepath = self.save(fd.read(), filepath=gzpath)
             fd.close()
             # read gzip
-            gzfd = self.__unzip(filepath)
-            line = gzfd.readline()
-            gzfd.close()
-            # TODO parse, and cache it
-            return line
+            fd = self.__unzip(filepath)
+            manpage = fd.readline() # TODO we should do the parsing here!
+            fd.close()
+            self.save(manpage, '%s.repr' % command, release, language)
+            return manpage
         return None
 
     def fetch(self, release, language, command):
@@ -114,11 +124,16 @@ class ManpageCache:
 
         try:
             # Open the cached manual page.
-            path = "%s/%s/%s/%s.repr" % \
-                (self.cachedir, release, language, command)
-            return eval(open(path, "r").read())
-        except:
-            # Not found or eval error; download from the online repo.
+            path = self.__makepath(release, language, '%s.repr' % command)
+            log.debug('ManpageCache.fetch: checking for %s.repr in cache.' %\
+                    command)
+            fd = open(path, 'r')
+            str = fd.read()
+            log.debug('ManpageCache.fetch: Success.')
+            return str
+        except Exception, e:
+            log.debug('ManpageCache.fetch: Manpage for %s isn\'t cached: %s' %\
+                    (command, e))
             return self.download(release, language, command)
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=79:

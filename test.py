@@ -26,6 +26,9 @@ class UbuntuManTestCase(PluginTestCase):
 
     def testMan(self):
         self.assertRegexp('man grep', 'GNU grep man page')
+        self.assertRegexp('man grep', 'GNU grep man page') # using cache
+        # cache overide
+        self.assertRegexp('man grep --nocache', 'GNU grep man page')
         #self.assertRegexp('man ls', '^ls.*\|')
         #self.assertRegexp('man asdasd', '^No manual page for')
         # test length limit

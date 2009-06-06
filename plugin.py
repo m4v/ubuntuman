@@ -55,7 +55,7 @@ class UbuntuMan(callbacks.Plugin):
         self.log.debug('UbuntuMan.man - command:%r release:%r language:%r '\
                 'nocache:%r' % (command, release, language, nocache))
         if nocache:
-            manpage = self.cache.download(release, language, command)
+            manpage = self.cache.download(release, language, command, nocache)
         else:
             manpage = self.cache.fetch(release, language, command)
         self.log.debug('UbuntuMan.man - manpage:%r' % manpage)
