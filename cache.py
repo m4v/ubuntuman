@@ -77,7 +77,8 @@ class ManpageCache:
         if fd:
             # save gzip
             path = '%s/%s/%s' % (self.cachedir, release, language)
-            os.makedirs(path)
+            if not os.path.exists(path):
+                os.makedirs(path)
             gzipPath = '%s/%s.gz' % (path, command)
             gzfd = open(gzipPath , 'wb')
             gzfd.write(fd.read())

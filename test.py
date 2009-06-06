@@ -25,8 +25,7 @@ class UbuntuManTestCase(PluginTestCase):
     plugins = ('UbuntuMan',)
 
     def testMan(self):
-        self.assertNotError('man grep')
-        #self.assertRegexp('man grep', '^grep.*\|')
+        self.assertRegexp('man grep', 'GNU grep man page')
         #self.assertRegexp('man ls', '^ls.*\|')
         #self.assertRegexp('man asdasd', '^No manual page for')
         # test length limit
