@@ -52,18 +52,13 @@ class ManpageCache:
     def __getManPageFd(self, release, language, command):
         """Get a file descriptor to the manual page in the Ubuntu Manpage
         Repository."""
-        if language == 'en':
-            languages = (language, )
-        else:
-            languages = (language, 'en')
         for section in ('1', '5', '8'): # XXX sections hardcoded for now
-            for language in languages:
-                url = self.__buildUrl(release, section, command, language)
-                log.debug('ManpageCache.__getManPageFd: Trying url %s' % url)
-                fd = self.__tryUrl(url)
-                if fd:
-                    log.debug('ManpageCache.__getManPageFd: Success.')
-                    return fd
+            url = self.__buildUrl(release, section, command, language)
+            log.debug('ManpageCache.__getManPageFd: Trying url %s' % url)
+            fd = self.__tryUrl(url)
+            if fd:
+                log.debug('ManpageCache.__getManPageFd: Success.')
+                return fd
         return None
 
     def __unzipFd(self, fd):
