@@ -67,6 +67,25 @@ class ManpageCache:
         from gzip import GzipFile
         return GzipFile(path)
 
+    def __makepath(self, release, language):
+        """Returns path in cache for a given release and language."""
+        return os.path.join(self.cachedir, release, language)
+
+    def save(self, filename, data, release, language):
+        """Saves data as filename in the cache. Returns the fullpath of the new
+        file."""
+        path = self.__makepath(release, language)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        filepath = os.path.join(path, filename)
+        try:
+            fd = open(filepath, 'w')
+            fd.write(data)
+            fd.close()
+        except IOError, e:
+            raise IOError, e
+        return filepath
+
     def download(self, release, language, command):
         """
         Download, parse and cache locally the manual page from the configured
@@ -78,16 +97,10 @@ class ManpageCache:
         fd = self.__getManPageFd(release, language, command)
         if fd:
             # save gzip
-            path = '%s/%s/%s' % (self.cachedir, release, language)
-            if not os.path.exists(path):
-                os.makedirs(path)
-            gzipPath = '%s/%s.gz' % (path, command)
-            gzfd = open(gzipPath , 'wb')
-            gzfd.write(fd.read())
+            filepath = self.save('%s.gz' % command, fd.read(), release, language)
             fd.close()
-            gzfd.close()
             # read gzip
-            gzfd = self.__unzip(gzipPath)
+            gzfd = self.__unzip(filepath)
             line = gzfd.readline()
             gzfd.close()
             # TODO parse, and cache it
