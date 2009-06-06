@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import supybot.log as log
 from urllib2 import urlopen, Request
 from urllib import quote, basejoin
@@ -61,9 +62,10 @@ class ManpageCache:
                 return fd
         return None
 
-    def __unzipFd(self, fd):
-        """Decompress a gziped file descriptor."""
-        pass
+    def __unzip(self, path):
+        """Returns a gzip.GzipFile object for reading a compressed file."""
+        from gzip import GzipFile
+        return GzipFile(path)
 
     def download(self, release, language, command):
         """
@@ -75,8 +77,20 @@ class ManpageCache:
 
         fd = self.__getManPageFd(release, language, command)
         if fd:
-            # TODO decompress, parse, and cache it
-            return 'got something I don\'t know what to do with!'
+            # save gzip
+            path = '%s/%s/%s' % (self.cachedir, release, language)
+            os.makedirs(path)
+            gzipPath = '%s/%s.gz' % (path, command)
+            gzfd = open(gzipPath , 'wb')
+            gzfd.write(fd.read())
+            fd.close()
+            gzfd.close()
+            # read gzip
+            gzfd = self.__unzip(gzipPath)
+            line = gzfd.readline()
+            gzfd.close()
+            # TODO parse, and cache it
+            return line
         return None
 
     def fetch(self, release, language, command):
@@ -85,6 +99,8 @@ class ManpageCache:
         the online repository.
         """
 
+        # XXX these asserts are needed? how could it be possible to these vars
+        # not be str?
         assert(type(self.cachedir) is str)
         assert(type(release) is str)
         assert(type(language) is str)
