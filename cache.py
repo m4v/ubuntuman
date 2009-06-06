@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from urllib2 import urlopen
+from urllib2 import urlopen, Request
+from urllib import quote
 
 class ManpageCache:
     """
@@ -22,9 +23,45 @@ class ManpageCache:
     """
 
     def __init__(self, baseurl, cachedir):
+        self.header = { 'User-agent':'Mozilla/5.0 (compatible; UbuntuMan '\
+                'Supybot plugin/2.0.0a' }
         self.baseurl = baseurl
         self.cachedir = cachedir
         #self.parsers = {'en': en.ManpageParser} # XXX 'en' isn't defined yet
+
+    def __buildUrl(self, release, section, command, language):
+        """Build URL to a manual page."""
+        url = '%s/manpages.gz/%s/%s/man%s/%s.%s.gz' % (self.baseurl(), release,
+                language, section, command, section)
+        url = quote(url)
+        # XXX check if is a valid url? probably better not to.
+        return url
+
+    def __tryUrl(self, url):
+        """Try to open the given URL.  If succeeds, returns it's file
+        descriptor; otherwise returns None."""
+        try:
+            request = Request(url, header=self.header)
+            return urlopen(request)
+        except:
+            return None
+
+    def __getManPageFd(self, release, language, command):
+        """Get a file descriptor to the manual page in the Ubuntu Manpage
+        Repository."""
+        if language == 'en':
+            languages = (language, )
+        else:
+            languages = (language, 'en')
+        for section in ('1', '5', '8'): # XXX sections hardcoded for now
+            for language in languages:
+                url = self.__buildUrl(release, section, command, language)
+                #self.log.debug('UbuntuMan: Trying url %s' % url)
+                fd = self.__tryUrl(url)
+                if fd:
+                    #self.log.debug('UbuntuMan: Success')
+                    return fd
+        return None
 
     def download(self, release, language, command):
         """
@@ -32,12 +69,12 @@ class ManpageCache:
         online manual page repository. Returns the manual page as a dictionary.
         """
 
-        # TO BE IMPLEMENTED
         assert(type(self.baseurl()) is str)
-        section = 1
 
-        url = "%s/%s/%s/man%s/%s.%s.gz" % \
-            (self.baseurl(), release, language, section, command, section)
+        fd = self.__getManPageFd(release, language, command)
+        if fd:
+            # TODO decompress, parse, and cache it
+            return 'got something I don\'t know what to do with!'
         return None
 
     def fetch(self, release, language, command):
