@@ -66,6 +66,10 @@ class ManpageCache:
                     return fd
         return None
 
+    def __unzipFd(self, fd):
+        """Decompress a gziped file descriptor."""
+        pass
+
     def download(self, release, language, command):
         """
         Download, parse and cache locally the manual page from the configured
