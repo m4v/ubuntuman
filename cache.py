@@ -78,6 +78,7 @@ class ManpageCache:
         if not os.path.exists(path):
             os.makedirs(path)
         filepath = os.path.join(path, filename)
+        log.info('ManpageCache.save: saving %r in cache.' % filepath)
         try:
             fd = open(filepath, 'w')
             fd.write(data)
@@ -91,8 +92,6 @@ class ManpageCache:
         Download, parse and cache locally the manual page from the configured
         online manual page repository. Returns the manual page as a dictionary.
         """
-
-        assert(type(self.baseurl()) is str)
 
         fd = self.__getManPageFd(release, language, command)
         if fd:
@@ -112,13 +111,6 @@ class ManpageCache:
         Fetches the requested manual page from the cache or downloads it from
         the online repository.
         """
-
-        # XXX these asserts are needed? how could it be possible to these vars
-        # not be str?
-        assert(type(self.cachedir) is str)
-        assert(type(release) is str)
-        assert(type(language) is str)
-        assert(type(command) is str)
 
         try:
             # Open the cached manual page.
