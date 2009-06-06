@@ -33,10 +33,7 @@ class UbuntuMan(callbacks.Plugin):
     def __init__(self, irc):
         self.__parent = super(UbuntuMan, self)
         self.__parent.__init__(irc)
-        cachedir = conf.supybot.directories.data.dirize(self.name())
-        baseurl = lambda: self.registryValue('baseurl')
-        self.cache = ManpageCache(baseurl, cachedir)
-        #self.log.debug('UbuntuMan.__init__ cachedir:%r' % cachedir)
+        self.cache = ManpageCache(self.name())
 
     def man(self, irc, msg, args, command, optlist):
         """<command> [--rel <release>] [--lang <language>] [--nocache]

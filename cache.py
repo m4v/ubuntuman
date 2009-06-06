@@ -16,6 +16,7 @@
 
 import os
 import supybot.log as log
+import supybot.conf as conf
 import supybot.utils as utils
 from urllib import basejoin
 
@@ -24,11 +25,12 @@ class ManpageCache:
     Class implementing the manual page cache.
     """
 
-    def __init__(self, baseurl, cachedir):
+    def __init__(self, name):
         self.header = { 'User-agent':
                 'Mozilla/5.0 (compatible; UbuntuMan Supybot plugin/2.0.0a' }
-        self.baseurl = baseurl
-        self.cachedir = cachedir
+        self.baseurl = conf.supybot.plugins.UbuntuMan.baseurl
+        self.sections = conf.supybot.plugins.UbuntuMan.sections
+        self.cachedir = conf.supybot.directories.data.dirize(name)
         #self.parsers = {'en': en.ManpageParser} # XXX 'en' isn't defined yet
 
     def __buildUrl(self, release, section, command, language):
@@ -51,7 +53,7 @@ class ManpageCache:
     def __getManPageFd(self, release, language, command):
         """Get a file descriptor to the manual page in the Ubuntu Manpage
         Repository."""
-        for section in ('1', '5', '8'): # XXX sections hardcoded for now
+        for section in self.sections():
             url = self.__buildUrl(release, section, command, language)
             log.debug('ManpageCache.__getManPageFd: Trying url %s' % url)
             fd = self.__tryUrl(url)
