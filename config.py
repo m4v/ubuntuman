@@ -51,8 +51,7 @@ UbuntuMan = conf.registerPlugin('UbuntuMan')
 
 conf.registerGlobalValue(UbuntuMan, 'baseurl',
     registry.String('http://manpages.ubuntu.com/manpages',
-             """Determines the base URL of the manpage repository.
-                Do not end this variable to slash."""))
+             """Determines the base URL of the manpage repository."""))
 
 conf.registerGlobalValue(UbuntuMan, 'release',
     registry.String('jaunty',

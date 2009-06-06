@@ -16,7 +16,7 @@
 
 import supybot.log as log
 from urllib2 import urlopen, Request
-from urllib import quote
+from urllib import quote, basejoin
 
 class ManpageCache:
     """
@@ -32,9 +32,9 @@ class ManpageCache:
 
     def __buildUrl(self, release, section, command, language):
         """Build URL to a manual page."""
-        url = '%s/manpages.gz/%s/%s/man%s/%s.%s.gz' % (self.baseurl(), release,
-                language, section, command, section)
-        url = quote(url)
+        url = 'manpages.gz/%s/%s/man%s/%s.%s.gz' % (release, language, section,
+                command, section)
+        url = basejoin(self.baseurl(), quote(url))
         # XXX check if is a valid url? probably better not to.
         return url
 
@@ -42,9 +42,11 @@ class ManpageCache:
         """Try to open the given URL.  If succeeds, returns it's file
         descriptor; otherwise returns None."""
         try:
-            request = Request(url, header=self.header)
+            request = Request(url, headers=self.header)
             return urlopen(request)
-        except:
+        except Exception, e:
+            #raise Exception, e # XXX we should handle timeouts and invalid
+                                # urls errors
             return None
 
     def __getManPageFd(self, release, language, command):
