@@ -63,9 +63,9 @@ class ManpageCache:
         return None
 
     def __unzip(self, path):
-        """Returns a gzip.GzipFile object for reading a compressed file."""
-        from gzip import GzipFile
-        return GzipFile(path)
+        """Returns a gzip file descriptor for reading a compressed file."""
+        import gzip
+        return gzip.open(path)
 
     def __makepath(self, release, language, file=''):
         """Returns path in cache for a given release and language."""
